@@ -13,28 +13,19 @@ function checkCashRegister(price, cash, cid) {
 
   let amountDue = (cash - price) * 100;
   let changeArr = [];
-  let finalDenominations = [];
-  let finalCurrency = [];
   let amountInDrawer = 0;
   let finalResult = [];
 
   // Calculate total amount in the cash drawer and filter finalDenominations and finalCurrency
   for (let i = 0; i < cid.length; i++) {
     amountInDrawer += cid[i][1] * 100;
-
-    if (cid[i][1] * 100 <= amountDue) {
-      finalDenominations.push(cid[i]);
-    }
-    // Check if the amount due is greater than or equal to the current denomination's value
   }
-
-  /*  if (amountInDrawer < amountDue || (cid[i][1] * 100) % amountDue !== 0) {
-      return { status: "INSUFFICIENT_FUNDS", change: [] };
-    }
-
-    else if (amountInDrawer === amountDue) {
-      return {status: "CLOSED", change: cid};
-    } */
+  if (amountInDrawer < amountDue) {
+    return { status: 'INSUFFICIENT_FUNDS', change: [] };
+  }
+  if (amountInDrawer === amountDue) {
+    return { status: 'CLOSED', change: cid };
+  }
 
   // Check if the current denomination is less than or equal to the change due
   for (let i = 0; i < currency.length; i++) {
@@ -62,6 +53,9 @@ function checkCashRegister(price, cash, cid) {
     if (toSubtract !== 0) {
       finalResult.push([finalCurrency[i][0], toSubtract / 100]);
     }
+    /*  if (finalCurrency[i] < 0 && toSubtract !== 0) {
+      return { status: 'INSUFFICIENT_FUNDS', change: [] };
+    }*/
   }
 
   console.log(finalDenominations);
