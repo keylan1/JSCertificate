@@ -16,32 +16,27 @@ function checkCashRegister(price, cash, cid) {
   let amountInDrawer = 0;
   let finalResult = [];
 
-  // Calculate total amount in the cash drawer and filter finalDenominations and finalCurrency
+  // Calculate total amount in the cash drawer
   for (let i = 0; i < cid.length; i++) {
     amountInDrawer += cid[i][1] * 100;
   }
+  // If cid is less than what is due, return insufficient funds
   if (amountInDrawer < amountDue) {
     return { status: 'INSUFFICIENT_FUNDS', change: [] };
   }
+  // If cid is equal to change due, then return insufficient funds closed and cid
   if (amountInDrawer === amountDue) {
     return { status: 'CLOSED', change: cid };
   }
 
-  // Check if the current denomination is less than or equal to the change due
+  // Iterate through cid and calculate the number of times each currency can be used for change
   for (let i = 0; i < currency.length; i++) {
-    if (currency[i][1] <= amountDue) {
-      finalCurrency.push(currency[i]);
-    }
-  }
-  // Iterate through finalDenominations and calculate the number of times each denomination can be used for change
-  for (let i = 0; i < finalCurrency.length; i++) {
-    changeArr.push(
-      Math.floor((finalDenominations[i][1] * 100) / finalCurrency[i][1])
-    );
+    changeArr.push(Math.floor((cid[i][1] * 100) / currency[i][1]));
   }
 
-  for (let i = finalCurrency.length - 1; i >= 0; i--) {
-    let denomination = finalCurrency[i][1];
+  //create the finalResult arr which calculates how much of each denomination is used based on the cid and the amountDue
+  for (let i = currency.length - 1; i >= 0; i--) {
+    let denomination = currency[i][1];
     let times = changeArr[i];
     let toSubtract = times * denomination;
 
@@ -51,15 +46,14 @@ function checkCashRegister(price, cash, cid) {
     }
     amountDue -= toSubtract;
     if (toSubtract !== 0) {
-      finalResult.push([finalCurrency[i][0], toSubtract / 100]);
+      finalResult.push([currency[i][0], toSubtract / 100]);
     }
-    /*  if (finalCurrency[i] < 0 && toSubtract !== 0) {
-      return { status: 'INSUFFICIENT_FUNDS', change: [] };
-    }*/
+  }
+  //if there is enough amountInDrawer but not enough exact change, return insufficient funds as well
+  if (amountDue !== 0) {
+    return { status: 'INSUFFICIENT_FUNDS', change: [] };
   }
 
-  console.log(finalDenominations);
-  console.log(finalCurrency);
   console.log(changeArr);
   console.log(finalResult);
   return { status: 'OPEN', change: finalResult };
